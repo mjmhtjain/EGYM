@@ -1,0 +1,139 @@
+openapi: 3.0.2
+
+info:
+  version: 1.0.0
+  title: eGym Coding Task API
+
+servers:
+  - url: http://localhost:8080
+
+paths:
+  '/exercise':
+    post:
+      summary: 'Insert a new exercise for a user.'
+      description: 'Persist a new exercise and generate its id.'
+      operationId: insertExercise
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Exercise'
+        required: true
+      responses:
+        '201':
+          description: 'Exercise created'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exercise'
+
+  '/exercise/{exerciseId}':
+    put:
+      summary: 'Update an existing exercise for a user.'
+      description: 'Update an already persisted exercise. Exercise id, user id and exercise type are excluded from the update.'
+      operationId: updateExercise
+      parameters:
+        - name: exerciseId
+          in: path
+          description: 'Id of the exercise to update'
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Exercise'
+        required: true
+      responses:
+        '200':
+          description: 'Exercise updated'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exercise'
+
+  '/ranking':
+    get:
+      summary: 'Get ranking for a set of users.'
+      description: >
+        Calculate the ranking for the given user ids. The calculation is based on the exercises the user has done in the last 28 days.
+        The list is sorted in descending order by user points.
+      operationId: getRanking
+      parameters:
+        - name: userIds
+          in: query
+          description: 'List of user ids to rank'
+          required: true
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
+            example: [1, 2, 3]
+      responses:
+        '200':
+          description: 'Ranking calculated'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RankingUser'
+
+components:
+  schemas:
+    ExerciseType:
+      description: 'Exercise type'
+      type: string
+      enum:
+        - RUNNING
+        - SWIMMING
+        - STRENGTH_TRAINING
+        - CIRCUIT_TRAINING
+      example: SWIMMING
+
+    RankingUser:
+      type: object
+      properties:
+        userId:
+          description: 'User id'
+          type: integer
+          format: int64
+          example: 1
+        points:
+          description: 'Points scored by the user in the last 28 days'
+          type: number
+          format: float
+          example: 1000.51
+
+    Exercise:
+      type: object
+      properties:
+        id:
+          description: 'Exercise id, this is ignored during the persist operations (insert/update)'
+          type: integer
+          format: int64
+        userId:
+          description: 'User who did the exercise'
+          type: integer
+          format: int64
+        description:
+          description: 'Description of the exercise, a non empty string containing only alphanumeric characters and spaces in between'
+          type: string
+        type:
+          $ref: '#/components/schemas/ExerciseType'
+        startTime:
+          description: 'UTC date and time the user started the exercise'
+          type: string
+          format: date-time
+          example: "2019-10-30T12:34:23Z"
+        duration:
+          description: 'Duration of the exercise in seconds'
+          type: integer
+          format: int64
+        calories:
+          description: 'Calories burnt in the exercise'
+          type: integer
+          format: int64
