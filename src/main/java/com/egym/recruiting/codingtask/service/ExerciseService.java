@@ -1,13 +1,5 @@
 package com.egym.recruiting.codingtask.service;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.egym.recruiting.codingtask.dao.ExerciseRepository;
 import com.egym.recruiting.codingtask.dto.ExerciseDTO;
 import com.egym.recruiting.codingtask.exception.ConflictException;
@@ -15,6 +7,13 @@ import com.egym.recruiting.codingtask.exception.NotFoundException;
 import com.egym.recruiting.codingtask.exception.SecurityException;
 import com.egym.recruiting.codingtask.model.Exercise;
 import com.egym.recruiting.codingtask.model.RankingUser;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ExerciseService {

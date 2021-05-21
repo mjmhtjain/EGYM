@@ -1,27 +1,21 @@
 package com.egym.recruiting.codingtask.api;
 
-import static com.jayway.restassured.RestAssured.*;
+import com.egym.recruiting.codingtask.model.Exercise;
+import com.jayway.restassured.RestAssured;
+import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.web.server.LocalServerPort;
 
 import java.time.OffsetDateTime;
 
-import org.apache.http.HttpStatus;
-import org.hamcrest.Matchers;
-import org.junit.Test;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import com.egym.recruiting.codingtask.model.Exercise;
-import com.jayway.restassured.RestAssured;
+import static com.jayway.restassured.RestAssured.given;
 
 /**
  * Integration test for testing the RESTful APIs provided by the {@link ExerciseApiController}. For easier testing we are going
  * to rely on the Rest Assured framework.
  */
-@ExtendWith(SpringExtension.class)
-@SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
 public class ExerciseApiControllerIntegrationTest {
 
 	@LocalServerPort

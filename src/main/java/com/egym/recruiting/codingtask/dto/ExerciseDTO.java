@@ -1,14 +1,12 @@
 package com.egym.recruiting.codingtask.dto;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-
 import com.egym.recruiting.codingtask.model.Exercise;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import com.egym.recruiting.codingtask.model.ExerciseType;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 public class ExerciseDTO extends ExerciseUpdateDTO {
 	@JsonProperty("userId")

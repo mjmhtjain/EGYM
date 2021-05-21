@@ -4,20 +4,26 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.time.OffsetDateTime;
 
 class ExerciseUpdateDTO {
 
 	@JsonProperty("description")
+	@NotNull @NotBlank
 	private String description;
 
 	@JsonProperty("startTime")
+	@NotNull
 	private OffsetDateTime startTime;
 
 	@JsonProperty("duration")
+	@NotNull
 	private Long duration;
 
 	@JsonProperty("calories")
+	@NotNull
 	private Long calories;
 
 	/**

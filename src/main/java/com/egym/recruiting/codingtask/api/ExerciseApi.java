@@ -5,10 +5,9 @@
  */
 package com.egym.recruiting.codingtask.api;
 
-import java.util.Optional;
-
-import javax.validation.Valid;
-
+import com.egym.recruiting.codingtask.dto.ExerciseDTO;
+import com.egym.recruiting.codingtask.model.Exercise;
+import io.swagger.annotations.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -18,13 +17,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.context.request.NativeWebRequest;
 
-import com.egym.recruiting.codingtask.dto.ExerciseDTO;
-import com.egym.recruiting.codingtask.model.Exercise;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import javax.validation.Valid;
+import java.util.Optional;
 
 @Validated
 @Api(value = "exercise")
