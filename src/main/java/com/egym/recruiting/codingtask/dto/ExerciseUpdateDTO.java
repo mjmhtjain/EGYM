@@ -1,12 +1,10 @@
 package com.egym.recruiting.codingtask.dto;
 
-import java.time.OffsetDateTime;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.Valid;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import io.swagger.annotations.ApiModelProperty;
+import java.time.OffsetDateTime;
 
 class ExerciseUpdateDTO {
 
@@ -16,7 +14,7 @@ class ExerciseUpdateDTO {
 	@JsonProperty("startTime")
 	private OffsetDateTime startTime;
 
-	@JsonProperty("startTime")
+	@JsonProperty("duration")
 	private Long duration;
 
 	@JsonProperty("calories")
