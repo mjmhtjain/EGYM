@@ -13,9 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -90,7 +88,16 @@ public class ExerciseService {
                 })
                 .collect(Collectors.toList());
 
-        //TODO: sort in decreasing order
+        Collections.sort(rankingUsers, new Comparator<RankingUser>() {
+            @Override
+            public int compare(RankingUser a, RankingUser b) {
+                int compare = Float.compare(b.getPoints(), a.getPoints());
+                if (compare != 0) return compare;
+
+                return b.getEndExercise().compareTo(a.getEndExercise());
+            }
+        });
+
         return rankingUsers;
     }
 
@@ -100,6 +107,17 @@ public class ExerciseService {
         for (Exercise exercise : exercises) {
             float points = calcPoints(exercise) + rankingUser.getPoints();
             rankingUser.setPoints(points);
+        }
+
+        Collections.sort(exercises, new Comparator<Exercise>() {
+            @Override
+            public int compare(Exercise o1, Exercise o2) {
+                return o2.getDuration().compareTo(o1.getDuration());
+            }
+        });
+
+        if (!exercises.isEmpty()) {
+            rankingUser.setEndExercise(exercises.get(0).getStartTime());
         }
 
         return rankingUser;

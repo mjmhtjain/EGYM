@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
 import static java.util.stream.Collectors.toList;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertArrayEquals;
 
 /**
  * Integration test for testing the RESTful APIs provided by the {@link ExerciseApiController}. For easier testing we are going
@@ -78,22 +78,22 @@ public class RankingApiControllerIntegrationTest {
             runTests(testFile);
         }
     }
-//
-//    @Test
-//    public void getRanking_givenDataOfMultipleUsersWithSameRankingPoints_expectRankingInCorrectOrderOfLatestDate() {
-//        List<String> testsFromFolder = readTestsFromFolder("exercise_ranking_input4.json");
-//        for (String testFile : testsFromFolder) {
-//            runTests(testFile);
-//        }
-//    }
-//
-//    @Test
-//    public void getRanking_givenDataMissingForUsers_expectRankingInCorrectOrder() {
-//        List<String> testsFromFolder = readTestsFromFolder("exercise_ranking_input5.json");
-//        for (String testFile : testsFromFolder) {
-//            runTests(testFile);
-//        }
-//    }
+
+    @Test
+    public void getRanking_givenDataOfMultipleUsersWithSameRankingPoints_expectRankingInCorrectOrderOfLatestDate() {
+        List<String> testsFromFolder = readTestsFromFolder("rankingAPI_4.json");
+        for (String testFile : testsFromFolder) {
+            runTests(testFile);
+        }
+    }
+
+    @Test
+    public void getRanking_givenDataMissingForUsers_expectRankingInCorrectOrder() {
+        List<String> testsFromFolder = readTestsFromFolder("rankingAPI_5.json");
+        for (String testFile : testsFromFolder) {
+            runTests(testFile);
+        }
+    }
 
     private void runTests(String testFile) {
         System.out.println("-----Executing integration testcases from file " + testFile + "-----");
@@ -142,8 +142,8 @@ public class RankingApiControllerIntegrationTest {
                             .then().statusCode(statusCode)
                             .extract().body().as(RankingUser[].class);
 
-                    RankingUser expectedResponse = OBJECT_MAPPER.treeToValue(responseBody, RankingUser.class);
-                    assertEquals(actualResponse[0], expectedResponse);
+                    RankingUser[] expectedResponse = OBJECT_MAPPER.treeToValue(responseBody, RankingUser[].class);
+                    assertArrayEquals(actualResponse, expectedResponse);
                 } catch (Exception ex) {
                     throw new Error(ex);
                 }
@@ -196,8 +196,7 @@ public class RankingApiControllerIntegrationTest {
         ClassPathResource jsonResource = new ClassPathResource("testcases/" + filename);
         try (InputStream inputStream = jsonResource.getInputStream()) {
             return new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
-                    .lines()
-                    .collect(toList());
+                    .lines().collect(toList());
         } catch (IOException ex) {
             throw new Error(ex);
         }
