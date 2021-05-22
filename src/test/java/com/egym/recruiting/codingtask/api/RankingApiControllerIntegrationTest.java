@@ -3,6 +3,7 @@ package com.egym.recruiting.codingtask.api;
 import com.egym.recruiting.codingtask.Application;
 import com.egym.recruiting.codingtask.dto.ExerciseDTO;
 import com.egym.recruiting.codingtask.model.ExerciseType;
+import com.egym.recruiting.codingtask.model.RankingUser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -23,11 +24,14 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
 import static java.util.stream.Collectors.toList;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Integration test for testing the RESTful APIs provided by the {@link ExerciseApiController}. For easier testing we are going
@@ -67,6 +71,7 @@ public class RankingApiControllerIntegrationTest {
         String url = request.get("url").asText();
         String requestBody = extractBody(request.get("body"));
         int statusCode = response.get("status_code").asInt();
+        JsonNode responseBody = response.get("body");
 
         String contentType = null;
         String type = request.get("headers").get("Content-Type").asText();
@@ -90,10 +95,14 @@ public class RankingApiControllerIntegrationTest {
             case "GET": {
                 Map<String, ?> queryParams = extractQueryParams(request);
                 try {
-                    given().contentType(contentType)
+                    RankingUser[] actualResponse = given().contentType(contentType)
                             .queryParameters(queryParams)
                             .when().get(baseUrl + url)
-                            .then().statusCode(statusCode);
+                            .then().statusCode(statusCode)
+                            .extract().body().as(RankingUser[].class);
+
+                    RankingUser expectedResponse = OBJECT_MAPPER.treeToValue(responseBody, RankingUser.class);
+                    assertEquals(actualResponse[0], expectedResponse);
                 } catch (Exception ex) {
                     throw new Error(ex);
                 }

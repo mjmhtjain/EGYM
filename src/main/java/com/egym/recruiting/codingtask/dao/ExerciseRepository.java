@@ -1,21 +1,12 @@
 package com.egym.recruiting.codingtask.dao;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
-
+import com.egym.recruiting.codingtask.model.Exercise;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-
-import com.egym.recruiting.codingtask.model.Exercise;
+import java.time.OffsetDateTime;
+import java.util.List;
 
 @Component
 public interface ExerciseRepository extends JpaRepository<Exercise, Long> {
@@ -32,8 +23,8 @@ public interface ExerciseRepository extends JpaRepository<Exercise, Long> {
 
 
 	// TODO fix the query
-	@Query("SELECT e FROM Exercise e")
-	List<Exercise> getUserExercisesBetweenTwoDates(final Long userId, final LocalDate begin,
-			final LocalDate end);
+	@Query("SELECT e FROM Exercise e WHERE e.userId = ?1 AND e.startTime >= ?2 AND e.startTime <= ?3")
+	List<Exercise> getUserExercisesBetweenTwoDates(final Long userId, final OffsetDateTime start,
+												   final OffsetDateTime end);
 
 }

@@ -10,10 +10,12 @@ import com.egym.recruiting.codingtask.model.RankingUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ExerciseService {
@@ -75,13 +77,72 @@ public class ExerciseService {
 		return exerciseRepository.saveAndFlush(exerciseInDb);
 	}
 
-	public List<RankingUser> ranking(final List<Long> userIds) {
-		// TODO
+    public List<RankingUser> ranking(final List<Long> userIds) {
+        List<RankingUser> rankingUsers;
 
-		return Collections.emptyList();
+        rankingUsers = userIds.stream()
+                .map(userId -> {
+                    List<Exercise> exercises = exerciseRepository.getUserExercisesBetweenTwoDates(userId,
+                            OffsetDateTime.now().minus(28, ChronoUnit.DAYS),
+                            OffsetDateTime.now());
+
+                    RankingUser rankingUser = genRankingUser(userId, exercises);
+                    return rankingUser;
+                })
+                .collect(Collectors.toList());
+
+        //TODO: sort in decreasing order
+        return rankingUsers;
+    }
+
+    private RankingUser genRankingUser(long userId, List<Exercise> exercises) {
+        RankingUser rankingUser = new RankingUser(userId);
+
+        for(Exercise exercise : exercises){
+            float points = calcPoints(exercise) + rankingUser.getPoints();
+            rankingUser.setPoints(points);
+        }
+
+        return rankingUser;
+    }
+
+    private float calcPoints(Exercise exercise) {
+		return (pointsPerCalories(exercise) + pointsPerStartMinute(exercise))
+				* percentBasedOnDay(exercise)
+				* multiplicationFactor(exercise);
+    }
+
+	private float multiplicationFactor(Exercise exercise) {
+		switch (exercise.getType()) {
+			case RUNNING:
+				return 2;
+			case SWIMMING:
+				return 3;
+			case STRENGTH_TRAINING:
+				return 3;
+			case CIRCUIT_TRAINING:
+				return 4;
+			default:
+				return 0;
+		}
 	}
 
+	private float percentBasedOnDay(Exercise exercise) {
+		OffsetDateTime now = OffsetDateTime.now();
+		OffsetDateTime exerciseStartTime = exercise.getStartTime();
 
+		long offsetInDays = exerciseStartTime.until(now, ChronoUnit.DAYS);
+		float percent =  (100 - (float)(offsetInDays * 10)) / 100;
+		return percent < 0 ? 0 : percent;
+	}
+
+	private float pointsPerStartMinute(Exercise exercise) {
+		return (exercise.getDuration() / 60) + 1;
+	}
+
+	private float pointsPerCalories(Exercise exercise) {
+		return exercise.getCalories();
+	}
 
 	private boolean isInConflict(final Exercise exerciseToPersist, final Collection<Exercise> userExercises,
 			final boolean update) {

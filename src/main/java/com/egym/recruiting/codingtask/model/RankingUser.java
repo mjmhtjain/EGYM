@@ -1,12 +1,11 @@
 package com.egym.recruiting.codingtask.model;
 
-import java.time.OffsetDateTime;
-import java.util.Objects;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import io.swagger.annotations.ApiModelProperty;
+
+import java.time.OffsetDateTime;
+import java.util.Objects;
 
 /**
  * RankingUser
@@ -16,10 +15,17 @@ public class RankingUser {
 	private Long userId;
 
 	@JsonProperty("points")
-	private Float points;
+	private Float points = 0.0f;
 
 	@JsonIgnore
 	private OffsetDateTime endExercise;
+
+	public RankingUser() {
+	}
+
+	public RankingUser(Long userId) {
+		this.userId = userId;
+	}
 
 	public OffsetDateTime getEndExercise() {
 		return endExercise;
