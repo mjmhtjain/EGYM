@@ -1,15 +1,17 @@
 package com.egym.recruiting.codingtask.api;
 
 import com.egym.recruiting.codingtask.Application;
+import com.egym.recruiting.codingtask.dao.ExerciseRepository;
 import com.egym.recruiting.codingtask.dto.ExerciseDTO;
 import com.egym.recruiting.codingtask.model.ExerciseType;
 import com.egym.recruiting.codingtask.model.RankingUser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.apache.http.HttpStatus;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
@@ -40,18 +42,58 @@ import static org.junit.Assert.assertEquals;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class RankingApiControllerIntegrationTest {
-    private static final String TIMESTAMP_OFFSET_PROPERTY = "_timestampOffset";
-    private static final String CONTENT_TYPE_JSON = MediaType.APPLICATION_JSON_VALUE;
+    private final String TIMESTAMP_OFFSET_PROPERTY = "_timestampOffset";
+    private final String CONTENT_TYPE_JSON = MediaType.APPLICATION_JSON_VALUE;
     private final String baseUrl = "http://localhost:8080";
     private final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
+    @Autowired
+    private ExerciseRepository exerciseRepository;
+
+    @After
+    public void tearDown() {
+        exerciseRepository.deleteAllExercise();
+    }
+
     @Test
-    public void testGetRanking() {
-        List<String> testsFromFolder = readTestsFromFolder();
+    public void getRanking_givenValidExerciseInputs_expectCorrectResults() {
+        List<String> testsFromFolder = readTestsFromFolder("rankingAPI_1.json");
         for (String testFile : testsFromFolder) {
             runTests(testFile);
         }
     }
+
+    @Test
+    public void getRanking_givenDataBefore30days_expectRankingPointsOnlyFromLast28DaysData() {
+        List<String> testsFromFolder = readTestsFromFolder("rankingAPI_2.json");
+        for (String testFile : testsFromFolder) {
+            runTests(testFile);
+        }
+    }
+
+    @Test
+    public void getRanking_givenDataOfMultipleUsers_expectRankingInCorrectOrder() {
+        List<String> testsFromFolder = readTestsFromFolder("rankingAPI_3.json");
+        for (String testFile : testsFromFolder) {
+            runTests(testFile);
+        }
+    }
+//
+//    @Test
+//    public void getRanking_givenDataOfMultipleUsersWithSameRankingPoints_expectRankingInCorrectOrderOfLatestDate() {
+//        List<String> testsFromFolder = readTestsFromFolder("exercise_ranking_input4.json");
+//        for (String testFile : testsFromFolder) {
+//            runTests(testFile);
+//        }
+//    }
+//
+//    @Test
+//    public void getRanking_givenDataMissingForUsers_expectRankingInCorrectOrder() {
+//        List<String> testsFromFolder = readTestsFromFolder("exercise_ranking_input5.json");
+//        for (String testFile : testsFromFolder) {
+//            runTests(testFile);
+//        }
+//    }
 
     private void runTests(String testFile) {
         System.out.println("-----Executing integration testcases from file " + testFile + "-----");
@@ -60,7 +102,6 @@ public class RankingApiControllerIntegrationTest {
             JsonNode testCase = parseJson(jsonCase);
             executeTestRequest(testCase);
         });
-        return;
     }
 
     private void executeTestRequest(JsonNode testCase) {
@@ -162,10 +203,14 @@ public class RankingApiControllerIntegrationTest {
         }
     }
 
-    private List<String> readTestsFromFolder() {
+    private List<String> readTestsFromFolder(String fileName) {
         try {
             return Files.list(Paths.get("src/test/resources/testcases"))
                     .filter(Files::isRegularFile)
+                    .filter(f -> {
+                        if(fileName == null) return false;
+                        return f.getFileName().toString().equals(fileName);
+                    })
                     .map(f -> f.getFileName().toString())
                     .filter(f -> f.endsWith(".json"))
                     .collect(toList());
@@ -174,14 +219,14 @@ public class RankingApiControllerIntegrationTest {
         }
     }
 
-    void insertExercises(long userId, long noOfEntries) {
-        for (long i = 0; i < noOfEntries; i++) {
-            ExerciseDTO ex1 = getDemoExerciseObj(userId, i);
-            given().body(ex1).contentType(MediaType.APPLICATION_JSON_VALUE).
-                    when().post(baseUrl + "/exercise").
-                    then().statusCode(HttpStatus.SC_CREATED);
-        }
-    }
+//    void insertExercises(long userId, long noOfEntries) {
+//        for (long i = 0; i < noOfEntries; i++) {
+//            ExerciseDTO ex1 = getDemoExerciseObj(userId, i);
+//            given().body(ex1).contentType(MediaType.APPLICATION_JSON_VALUE).
+//                    when().post(baseUrl + "/exercise").
+//                    then().statusCode(HttpStatus.SC_CREATED);
+//        }
+//    }
 
     private ExerciseDTO getDemoExerciseObj(long userId, long daysAgo) {
         ExerciseDTO exerciseDTO = new ExerciseDTO();

@@ -1,5 +1,6 @@
 package com.egym.recruiting.codingtask.service;
 
+import com.egym.recruiting.codingtask.config.ExerciseConstants;
 import com.egym.recruiting.codingtask.dao.ExerciseRepository;
 import com.egym.recruiting.codingtask.dto.ExerciseDTO;
 import com.egym.recruiting.codingtask.exception.ConflictException;
@@ -19,63 +20,61 @@ import java.util.stream.Collectors;
 
 @Service
 public class ExerciseService {
+    @Autowired
+    private ExerciseRepository exerciseRepository;
 
+    public Exercise insert(final ExerciseDTO e) {
+        // Validate input
+        if (!isValidInputForInsert(e)) {
+            throw new IllegalArgumentException();
+        }
 
-	@Autowired
-	private ExerciseRepository exerciseRepository;
+        final Exercise ex = ExerciseDTO.fromDTO(e);
+        //Check if the exercise is gonna be a conflict
+        if (isInConflict(ex, exerciseRepository.getUserExercises(e.getUserId()), false)) {
+            throw new ConflictException();
+        }
 
-	public Exercise insert(final ExerciseDTO e) {
-		// Validate input
-		if (!isValidInputForInsert(e)) {
-			throw new IllegalArgumentException();
-		}
+        return exerciseRepository.saveAndFlush(ex);
+    }
 
-		final Exercise ex = ExerciseDTO.fromDTO(e);
-		//Check if the exercise is gonna be a conflict
-		if (isInConflict(ex, exerciseRepository.getUserExercises(e.getUserId()), false)) {
-			throw new ConflictException();
-		}
+    public Exercise update(final Long exerciseId, final ExerciseDTO e) {
+        // Validate input
+        if (!isValidInputForUpdate(e)) {
+            throw new IllegalArgumentException();
+        }
 
-		return exerciseRepository.saveAndFlush(ex);
-	}
+        //Check if the exercise exists
+        Optional<Exercise> exerciseOptional = exerciseRepository.findById(exerciseId);
+        if (exerciseOptional.isEmpty()) {
+            throw new NotFoundException();
+        }
 
-	public Exercise update(final Long exerciseId, final ExerciseDTO e) {
-		// Validate input
-		if (!isValidInputForUpdate(e)) {
-			throw new IllegalArgumentException();
-		}
+        Exercise exerciseInDb = exerciseOptional.get();
+        // Check if it is changing type
+        if (e.getType() != null && !e.getType().equals(exerciseInDb.getType()))
+            throw new IllegalArgumentException();
 
-		//Check if the exercise exists
-		Optional<Exercise> exerciseOptional = exerciseRepository.findById(exerciseId);
-		if (exerciseOptional.isEmpty()) {
-			throw new NotFoundException();
-		}
+        // Check if it is changing user id
+        if (e.getUserId() != null && !e.getUserId().equals(exerciseInDb.getUserId()))
+            throw new SecurityException();
 
-		Exercise exerciseInDb = exerciseOptional.get();
-		// Check if it is changing type
-		if(e.getType() != null && !e.getType().equals(exerciseInDb.getType()))
-			throw new IllegalArgumentException();
+        final Exercise ex = ExerciseDTO.fromDTO(e);
+        //Check if the exercise is gonna be a conflict
+        ex.setId(exerciseId);
+        if (isInConflict(ex, exerciseRepository.getUserExercises(exerciseInDb.getUserId()), true)) {
+            throw new ConflictException();
+        }
 
-		// Check if it is changing user id
-		if(e.getUserId() != null && !e.getUserId().equals(exerciseInDb.getUserId()))
-			throw new SecurityException();
+        // Update the exercise values
+        exerciseInDb.setId(exerciseId);
+        exerciseInDb.setCalories(ex.getCalories());
+        exerciseInDb.setDescription(ex.getDescription());
+        exerciseInDb.setDuration(ex.getDuration());
+        exerciseInDb.setStartTime(ex.getStartTime());
 
-		final Exercise ex = ExerciseDTO.fromDTO(e);
-		//Check if the exercise is gonna be a conflict
-		ex.setId(exerciseId);
-		if (isInConflict(ex, exerciseRepository.getUserExercises(exerciseInDb.getUserId()), true)) {
-			throw new ConflictException();
-		}
-
-		// Update the exercise values
-		exerciseInDb.setId(exerciseId);
-		exerciseInDb.setCalories(ex.getCalories());
-		exerciseInDb.setDescription(ex.getDescription());
-		exerciseInDb.setDuration(ex.getDuration());
-		exerciseInDb.setStartTime(ex.getStartTime());
-
-		return exerciseRepository.saveAndFlush(exerciseInDb);
-	}
+        return exerciseRepository.saveAndFlush(exerciseInDb);
+    }
 
     public List<RankingUser> ranking(final List<Long> userIds) {
         List<RankingUser> rankingUsers;
@@ -83,7 +82,7 @@ public class ExerciseService {
         rankingUsers = userIds.stream()
                 .map(userId -> {
                     List<Exercise> exercises = exerciseRepository.getUserExercisesBetweenTwoDates(userId,
-                            OffsetDateTime.now().minus(28, ChronoUnit.DAYS),
+                            OffsetDateTime.now().minus(ExerciseConstants.EXCERCISE_START_DAY_OFFSET, ChronoUnit.DAYS),
                             OffsetDateTime.now());
 
                     RankingUser rankingUser = genRankingUser(userId, exercises);
@@ -98,7 +97,7 @@ public class ExerciseService {
     private RankingUser genRankingUser(long userId, List<Exercise> exercises) {
         RankingUser rankingUser = new RankingUser(userId);
 
-        for(Exercise exercise : exercises){
+        for (Exercise exercise : exercises) {
             float points = calcPoints(exercise) + rankingUser.getPoints();
             rankingUser.setPoints(points);
         }
@@ -107,59 +106,59 @@ public class ExerciseService {
     }
 
     private float calcPoints(Exercise exercise) {
-		return (pointsPerCalories(exercise) + pointsPerStartMinute(exercise))
-				* percentBasedOnDay(exercise)
-				* multiplicationFactor(exercise);
+        return (pointsPerCalories(exercise) + pointsPerStartMinute(exercise))
+                * percentBasedOnDay(exercise)
+                * multiplicationFactor(exercise);
     }
 
-	private float multiplicationFactor(Exercise exercise) {
-		switch (exercise.getType()) {
-			case RUNNING:
-				return 2;
-			case SWIMMING:
-				return 3;
-			case STRENGTH_TRAINING:
-				return 3;
-			case CIRCUIT_TRAINING:
-				return 4;
-			default:
-				return 0;
-		}
-	}
+    private float multiplicationFactor(Exercise exercise) {
+        switch (exercise.getType()) {
+            case RUNNING:
+                return 2;
+            case SWIMMING:
+                return 3;
+            case STRENGTH_TRAINING:
+                return 3;
+            case CIRCUIT_TRAINING:
+                return 4;
+            default:
+                return 0;
+        }
+    }
 
-	private float percentBasedOnDay(Exercise exercise) {
-		OffsetDateTime now = OffsetDateTime.now();
-		OffsetDateTime exerciseStartTime = exercise.getStartTime();
+    private float percentBasedOnDay(Exercise exercise) {
+        OffsetDateTime now = OffsetDateTime.now();
+        OffsetDateTime exerciseStartTime = exercise.getStartTime();
 
-		long offsetInDays = exerciseStartTime.until(now, ChronoUnit.DAYS);
-		float percent =  (100 - (float)(offsetInDays * 10)) / 100;
-		return percent < 0 ? 0 : percent;
-	}
+        long offsetInDays = exerciseStartTime.until(now, ChronoUnit.DAYS);
+        float percent = (100 - (float) (offsetInDays * ExerciseConstants.PERCENT_DEDUCTION_PER_DAY)) / 100;
+        return percent < 0 ? 0 : percent;
+    }
 
-	private float pointsPerStartMinute(Exercise exercise) {
-		return (exercise.getDuration() / 60) + 1;
-	}
+    private float pointsPerStartMinute(Exercise exercise) {
+        return (exercise.getDuration() / ExerciseConstants.SECONDS_IN_MINUTE) + 1;
+    }
 
-	private float pointsPerCalories(Exercise exercise) {
-		return exercise.getCalories();
-	}
+    private float pointsPerCalories(Exercise exercise) {
+        return exercise.getCalories();
+    }
 
-	private boolean isInConflict(final Exercise exerciseToPersist, final Collection<Exercise> userExercises,
-			final boolean update) {
-		// TODO
-		return false;
-	}
+    private boolean isInConflict(final Exercise exerciseToPersist, final Collection<Exercise> userExercises,
+                                 final boolean update) {
+        // TODO
+        return false;
+    }
 
-	public boolean isValidInputForInsert(final ExerciseDTO e) {
-		// TODO
+    public boolean isValidInputForInsert(final ExerciseDTO e) {
+        // TODO
 
-		return isValidInputForUpdate(e);
-	}
+        return isValidInputForUpdate(e);
+    }
 
-	public boolean isValidInputForUpdate(final ExerciseDTO e) {
-		// TODO
+    public boolean isValidInputForUpdate(final ExerciseDTO e) {
+        // TODO
 
-		return true;
-	}
+        return true;
+    }
 
 }
