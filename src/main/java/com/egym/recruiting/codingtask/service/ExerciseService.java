@@ -169,18 +169,32 @@ public class ExerciseService {
 
     private boolean isInConflict(final Exercise exerciseToPersist, final Collection<Exercise> userExercises,
                                  final boolean update) {
-        // TODO
+
         return false;
     }
 
-    //validation done with annotations on Controller layer
     public boolean isValidInputForInsert(final ExerciseDTO e) {
         return isValidInputForUpdate(e);
     }
 
-    //validation done with annotations on Controller layer
     public boolean isValidInputForUpdate(final ExerciseDTO e) {
+        if (isNegativeCalories(e) || isFutureStartEndDate(e)) {
+            return false;
+        }
+
         return true;
+    }
+
+    private boolean isFutureStartEndDate(ExerciseDTO exerciseDTO) {
+        OffsetDateTime startTime = exerciseDTO.getStartTime();
+        OffsetDateTime endTime = startTime.plus(exerciseDTO.getDuration(), ChronoUnit.SECONDS);
+
+        return startTime.compareTo(OffsetDateTime.now()) > 0 &&
+                endTime.compareTo(OffsetDateTime.now()) > 0;
+    }
+
+    private boolean isNegativeCalories(ExerciseDTO e) {
+        return e.getCalories() < 0;
     }
 
 }

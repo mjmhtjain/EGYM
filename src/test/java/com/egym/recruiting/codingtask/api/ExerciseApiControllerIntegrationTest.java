@@ -45,7 +45,7 @@ public class ExerciseApiControllerIntegrationTest {
     }
 
     @Test
-    public void insertExercise_invalidExercise_respondWithStatusCode400() {
+    public void insertExercise_nullOrBlankParams_respondWithStatusCode400() {
         ExerciseDTO ex1 = getDemoExerciseObj();
         ex1.setDescription("");
         given().body(ex1).contentType(MediaType.APPLICATION_JSON_VALUE).
@@ -63,6 +63,52 @@ public class ExerciseApiControllerIntegrationTest {
         given().body(ex1).contentType(MediaType.APPLICATION_JSON_VALUE).
                 when().post(baseUrl + "/exercise").
                 then().statusCode(HttpStatus.BAD_REQUEST.value());
+    }
+
+    @Test
+    public void insertExercise_invalidStartEndDateOrCalories_respondWithStatusCode422() {
+        ExerciseDTO ex1 = getDemoExerciseObj();
+        ex1.setStartTime(OffsetDateTime.now().plusDays(1));
+
+        given().body(ex1).contentType(MediaType.APPLICATION_JSON_VALUE).
+                when().post(baseUrl + "/exercise").
+                then().statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value());
+
+        ex1 = getDemoExerciseObj();
+        ex1.setCalories(Long.valueOf(-2));
+        given().body(ex1).contentType(MediaType.APPLICATION_JSON_VALUE).
+                when().post(baseUrl + "/exercise").
+                then().statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value());
+    }
+
+    @Test
+    public void insertExercise_badStartTimeFormat_respondWithStatusCode422() {
+        ExerciseDTO ex1 = getDemoExerciseObj();
+        ex1.setStartTime(OffsetDateTime.now().plusDays(1));
+
+        given().body(ex1).contentType(MediaType.APPLICATION_JSON_VALUE).
+                when().post(baseUrl + "/exercise").
+                then().statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value());
+    }
+
+    @Test
+    public void insertExercise_descriptionContainsSymbols_respondWithStatusCode422() {
+        ExerciseDTO ex1 = getDemoExerciseObj();
+        ex1.setStartTime(OffsetDateTime.now().plusDays(1));
+
+        given().body(ex1).contentType(MediaType.APPLICATION_JSON_VALUE).
+                when().post(baseUrl + "/exercise").
+                then().statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value());
+    }
+
+    @Test
+    public void insertExercise_conflictingStartTimeAndDuration_respondWithStatusCode422() {
+        ExerciseDTO ex1 = getDemoExerciseObj();
+        ex1.setStartTime(OffsetDateTime.now().plusDays(1));
+
+        given().body(ex1).contentType(MediaType.APPLICATION_JSON_VALUE).
+                when().post(baseUrl + "/exercise").
+                then().statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value());
     }
 
     @Test

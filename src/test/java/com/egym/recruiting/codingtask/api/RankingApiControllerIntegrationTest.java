@@ -218,15 +218,6 @@ public class RankingApiControllerIntegrationTest {
         }
     }
 
-//    void insertExercises(long userId, long noOfEntries) {
-//        for (long i = 0; i < noOfEntries; i++) {
-//            ExerciseDTO ex1 = getDemoExerciseObj(userId, i);
-//            given().body(ex1).contentType(MediaType.APPLICATION_JSON_VALUE).
-//                    when().post(baseUrl + "/exercise").
-//                    then().statusCode(HttpStatus.SC_CREATED);
-//        }
-//    }
-
     private ExerciseDTO getDemoExerciseObj(long userId, long daysAgo) {
         ExerciseDTO exerciseDTO = new ExerciseDTO();
         exerciseDTO.setUserId(Long.valueOf(userId));
@@ -238,6 +229,4 @@ public class RankingApiControllerIntegrationTest {
 
         return exerciseDTO;
     }
-
-    // TODO add more tests for the RankingApiController
 }
