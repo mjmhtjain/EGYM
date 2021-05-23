@@ -64,7 +64,7 @@ public class RankingApiControllerIntegrationTest {
     }
 
     @Test
-    public void getRanking_givenDataBefore30days_expectRankingPointsOnlyFromLast28DaysData() {
+    public void getRanking_givenDataBefore28days_expectRankingPointsCalcOnlyFromLast28DaysData() {
         List<String> testsFromFolder = readTestsFromFolder("rankingAPI_2.json");
         for (String testFile : testsFromFolder) {
             runTests(testFile);
@@ -143,7 +143,7 @@ public class RankingApiControllerIntegrationTest {
                             .extract().body().as(RankingUser[].class);
 
                     RankingUser[] expectedResponse = OBJECT_MAPPER.treeToValue(responseBody, RankingUser[].class);
-                    assertArrayEquals(actualResponse, expectedResponse);
+                    assertArrayEquals(expectedResponse, actualResponse);
                 } catch (Exception ex) {
                     throw new Error(ex);
                 }

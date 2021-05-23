@@ -7,6 +7,7 @@ import com.egym.recruiting.codingtask.exception.ConflictException;
 import com.egym.recruiting.codingtask.exception.NotFoundException;
 import com.egym.recruiting.codingtask.exception.SecurityException;
 import com.egym.recruiting.codingtask.model.Exercise;
+import com.egym.recruiting.codingtask.model.ExerciseType;
 import com.egym.recruiting.codingtask.model.RankingUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,8 +19,22 @@ import java.util.stream.Collectors;
 
 @Service
 public class ExerciseService {
-    @Autowired
     private ExerciseRepository exerciseRepository;
+    private Map<ExerciseType, Integer> exerciseTypePointMultipleMap;
+
+    @Autowired
+    public ExerciseService(ExerciseRepository exerciseRepository) {
+        this.exerciseRepository = exerciseRepository;
+        initPointMultipleMap();
+    }
+
+    private void initPointMultipleMap() {
+        exerciseTypePointMultipleMap = new HashMap<>();
+        exerciseTypePointMultipleMap.put(ExerciseType.RUNNING, ExerciseConstants.RUNNING_POINT_MULTIPLE);
+        exerciseTypePointMultipleMap.put(ExerciseType.SWIMMING, ExerciseConstants.SWIMMING_POINT_MULTIPLE);
+        exerciseTypePointMultipleMap.put(ExerciseType.STRENGTH_TRAINING, ExerciseConstants.STRENGTH_TRAINING_POINT_MULTIPLE);
+        exerciseTypePointMultipleMap.put(ExerciseType.CIRCUIT_TRAINING, ExerciseConstants.CIRCUIT_TRAINING_POINT_MULTIPLE);
+    }
 
     public Exercise insert(final ExerciseDTO e) {
         // Validate input
@@ -77,6 +92,7 @@ public class ExerciseService {
     public List<RankingUser> ranking(final List<Long> userIds) {
         List<RankingUser> rankingUsers;
 
+        //fetch ranking of all userIds
         rankingUsers = userIds.stream()
                 .map(userId -> {
                     List<Exercise> exercises = exerciseRepository.getUserExercisesBetweenTwoDates(userId,
@@ -88,6 +104,7 @@ public class ExerciseService {
                 })
                 .collect(Collectors.toList());
 
+        //sort the ranking in desc order
         Collections.sort(rankingUsers, new Comparator<RankingUser>() {
             @Override
             public int compare(RankingUser a, RankingUser b) {
@@ -129,19 +146,8 @@ public class ExerciseService {
                 * multiplicationFactor(exercise);
     }
 
-    private float multiplicationFactor(Exercise exercise) {
-        switch (exercise.getType()) {
-            case RUNNING:
-                return 2;
-            case SWIMMING:
-                return 3;
-            case STRENGTH_TRAINING:
-                return 3;
-            case CIRCUIT_TRAINING:
-                return 4;
-            default:
-                return 0;
-        }
+    private int multiplicationFactor(Exercise exercise) {
+        return exerciseTypePointMultipleMap.get(exercise.getType());
     }
 
     private float percentBasedOnDay(Exercise exercise) {
@@ -167,15 +173,13 @@ public class ExerciseService {
         return false;
     }
 
+    //validation done with annotations on Controller layer
     public boolean isValidInputForInsert(final ExerciseDTO e) {
-        // TODO
-
         return isValidInputForUpdate(e);
     }
 
+    //validation done with annotations on Controller layer
     public boolean isValidInputForUpdate(final ExerciseDTO e) {
-        // TODO
-
         return true;
     }
 
