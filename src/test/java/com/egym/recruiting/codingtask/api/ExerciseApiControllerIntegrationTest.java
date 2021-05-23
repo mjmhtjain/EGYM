@@ -45,7 +45,7 @@ public class ExerciseApiControllerIntegrationTest {
     }
 
     @Test
-    public void insertExercise_invalidExercise_respondWithStatusCode403() {
+    public void insertExercise_invalidExercise_respondWithStatusCode400() {
         ExerciseDTO ex1 = getDemoExerciseObj();
         ex1.setDescription("");
         given().body(ex1).contentType(MediaType.APPLICATION_JSON_VALUE).
