@@ -1,11 +1,14 @@
 package com.egym.recruiting.codingtask.api;
 
 import com.egym.recruiting.codingtask.Application;
+import com.egym.recruiting.codingtask.dao.ExerciseRepository;
 import com.egym.recruiting.codingtask.dto.ExerciseDTO;
 import com.egym.recruiting.codingtask.model.Exercise;
 import com.egym.recruiting.codingtask.model.ExerciseType;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -24,6 +27,14 @@ import static org.hamcrest.Matchers.is;
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class ExerciseApiControllerIntegrationTest {
     private final String baseUrl = "http://localhost:8080";
+
+    @Autowired
+    private ExerciseRepository exerciseRepository;
+
+    @After
+    public void tearDown() {
+        exerciseRepository.deleteAllExercise();
+    }
 
     @Test
     public void insertExercise_validExercise_respondWithStatusCode201() {
