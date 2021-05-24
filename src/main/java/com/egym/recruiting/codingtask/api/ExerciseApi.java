@@ -38,7 +38,7 @@ public interface ExerciseApi {
 
 	@ApiOperation(value = "Insert a new exercise for a user.", nickname = "insertExercise", notes = "Persist a new exercise and generate its id.", response = Exercise.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 201, message = "Exercise created", response = Exercise.class),
-			@ApiResponse(code = 422, message = "Unprocessable Entity") })
+			@ApiResponse(code = 422, message = "Unprocessable Entity")})
 	@PostMapping(value = "/exercise", produces = { "application/json" }, consumes = { "application/json" })
 	default ResponseEntity<Exercise> insertExercise(
 			@ApiParam(value = "", required = true) @Valid @RequestBody final ExerciseDTO exercise) {
@@ -46,7 +46,8 @@ public interface ExerciseApi {
 	}
 
 	@ApiOperation(value = "Update an existing exercise for a user.", nickname = "updateExercise", notes = "Update an already persisted exercise. Exercise id, user id and exercise type are excluded from the update.", response = Exercise.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Exercise updated", response = Exercise.class) })
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Exercise updated", response = Exercise.class),
+			@ApiResponse(code = 422, message = "Unprocessable Entity")})
 	@PutMapping(value = "/exercise/{exerciseId}", produces = { "application/json" }, consumes = { "application/json" })
 	default ResponseEntity<Exercise> updateExercise(
 			@ApiParam(value = "Id of the exercise to update", required = true) @PathVariable("exerciseId") final Long exerciseId,
