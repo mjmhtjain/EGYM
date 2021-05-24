@@ -1,9 +1,14 @@
 package com.egym.recruiting.codingtask.util;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 
 public class ExerciseValidationUtil {
+    public static boolean isNonUTCTimestamp(OffsetDateTime timestamp){
+        return timestamp.getOffset().compareTo(ZoneOffset.UTC) != 0;
+    }
+
     public static boolean isInCorrectTimeStampFormat(OffsetDateTime timestamp){
         return !ExerciseConstants.RFC3339_PATTERN.matcher(timestamp.toString()).matches();
     }

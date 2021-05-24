@@ -205,7 +205,8 @@ public class ExerciseService {
                 isNegative(exerciseDTO.getDuration()) ||
                 isFutureTimeStamp(exerciseDTO.getStartTime(), exerciseDTO.getDuration()) ||
                 isNonAlphanumeric(exerciseDTO.getDescription()) ||
-                isInCorrectTimeStampFormat(exerciseDTO.getStartTime()));
+                isInCorrectTimeStampFormat(exerciseDTO.getStartTime()) ||
+                isNonUTCTimestamp(exerciseDTO.getStartTime()));
     }
 
 }
