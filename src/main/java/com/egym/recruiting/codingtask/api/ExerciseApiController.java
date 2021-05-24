@@ -35,20 +35,12 @@ public class ExerciseApiController implements ExerciseApi {
 
     @Override
     public ResponseEntity<Exercise> insert(final ExerciseDTO exercise) {
-        try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(exerciseService.insert(exercise));
-        } catch (IllegalArgumentException exception) {
-            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build();
-        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(exerciseService.insert(exercise));
     }
 
     @Override
     public ResponseEntity<Exercise> update(final Long exerciseId, final ExerciseDTO exercise) {
-        try {
-            return ResponseEntity.status(HttpStatus.OK).body(exerciseService.update(exerciseId, exercise));
-        } catch (IllegalArgumentException exception) {
-            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build();
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(exerciseService.update(exerciseId, exercise));
     }
 
 }
