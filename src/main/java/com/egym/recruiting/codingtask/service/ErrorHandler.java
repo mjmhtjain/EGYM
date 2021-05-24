@@ -17,7 +17,7 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(IllegalArgumentException.class)
 	public final ResponseEntity<Void> handleIllegalArgumentException(final IllegalArgumentException ex,
 			final WebRequest request) {
-		return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
 	}
 
 	@ExceptionHandler(InvalidDefinitionException.class)
