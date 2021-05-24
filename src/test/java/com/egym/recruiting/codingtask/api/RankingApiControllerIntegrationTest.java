@@ -177,7 +177,7 @@ public class RankingApiControllerIntegrationTest {
         if (bodyObject.has(TIMESTAMP_OFFSET_PROPERTY)) {
             long offset = bodyObject.get(TIMESTAMP_OFFSET_PROPERTY).asLong();
             bodyObject.remove(TIMESTAMP_OFFSET_PROPERTY);
-            OffsetDateTime timestamp = OffsetDateTime.now().plusDays(offset);
+            OffsetDateTime timestamp = OffsetDateTime.now().plusDays(offset).minusHours(1);
 
             bodyObject.put("startTime", String.valueOf(timestamp));
         }

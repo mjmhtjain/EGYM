@@ -1,6 +1,6 @@
 package com.egym.recruiting.codingtask.service;
 
-import com.egym.recruiting.codingtask.config.ExerciseConstants;
+import com.egym.recruiting.codingtask.util.ExerciseConstants;
 import com.egym.recruiting.codingtask.dao.ExerciseRepository;
 import com.egym.recruiting.codingtask.dto.ExerciseDTO;
 import com.egym.recruiting.codingtask.exception.ConflictException;
@@ -16,6 +16,8 @@ import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.egym.recruiting.codingtask.util.ExerciseValidationUtil.*;
 
 @Service
 public class ExerciseService {
@@ -169,32 +171,41 @@ public class ExerciseService {
 
     private boolean isInConflict(final Exercise exerciseToPersist, final Collection<Exercise> userExercises,
                                  final boolean update) {
+        OffsetDateTime exerciseToPersistStartTime = exerciseToPersist.getStartTime();
+        OffsetDateTime exerciseToPersistEndTime = exerciseToPersistStartTime
+                .plusSeconds(exerciseToPersist.getDuration());
 
-        return false;
+        return userExercises.stream()
+                .filter(exercise ->
+                     update ? exercise.getId() != exerciseToPersist.getId() : true
+                )
+                .anyMatch(exercise -> {
+                    OffsetDateTime startTime = exercise.getStartTime();
+                    OffsetDateTime endTime = startTime.plusSeconds(exercise.getDuration());
+
+                    if (startTime.isBefore(exerciseToPersistStartTime)) {
+                        return endTime.isAfter(exerciseToPersistStartTime);
+                    } else if (startTime.isEqual(exerciseToPersistStartTime)) {
+                        return true;
+                    } else if (startTime.isAfter(exerciseToPersistStartTime) &&
+                            startTime.isBefore(exerciseToPersistEndTime)) {
+                        return true;
+                    }
+
+                    return false;
+                });
     }
 
     public boolean isValidInputForInsert(final ExerciseDTO e) {
         return isValidInputForUpdate(e);
     }
 
-    public boolean isValidInputForUpdate(final ExerciseDTO e) {
-        if (isNegativeCalories(e) || isFutureStartEndDate(e)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    private boolean isFutureStartEndDate(ExerciseDTO exerciseDTO) {
-        OffsetDateTime startTime = exerciseDTO.getStartTime();
-        OffsetDateTime endTime = startTime.plus(exerciseDTO.getDuration(), ChronoUnit.SECONDS);
-
-        return startTime.compareTo(OffsetDateTime.now()) > 0 &&
-                endTime.compareTo(OffsetDateTime.now()) > 0;
-    }
-
-    private boolean isNegativeCalories(ExerciseDTO e) {
-        return e.getCalories() < 0;
+    public boolean isValidInputForUpdate(final ExerciseDTO exerciseDTO) {
+        return !(isNegative(exerciseDTO.getCalories()) ||
+                isNegative(exerciseDTO.getDuration()) ||
+                isFutureTimeStamp(exerciseDTO.getStartTime(), exerciseDTO.getDuration()) ||
+                isNonAlphanumeric(exerciseDTO.getDescription()) ||
+                isInCorrectTimeStampFormat(exerciseDTO.getStartTime()));
     }
 
 }
