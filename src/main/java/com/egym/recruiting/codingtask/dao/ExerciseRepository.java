@@ -28,7 +28,6 @@ public interface ExerciseRepository extends JpaRepository<Exercise, Long> {
 	@Query("DELETE FROM Exercise")
 	void deleteAllExercise();
 
-	// TODO fix the query
 	@Query("SELECT e FROM Exercise e WHERE e.userId = ?1 AND e.startTime >= ?2 AND e.startTime <= ?3")
 	List<Exercise> getUserExercisesBetweenTwoDates(final Long userId, final OffsetDateTime start,
 												   final OffsetDateTime end);
