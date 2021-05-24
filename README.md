@@ -21,11 +21,11 @@ You need to extend the SpringBoot application with the following functionality.
 Note that some features might already be implemented.
 
 - Insert new exercises.
-    - All exercise fields except the id should be mandatory for inserting. (TODO)
+    - All exercise fields except the id should be mandatory for inserting.
   
 - Update exercises.
     - While updating an exercise, the user id and type shouldn't change.
-    - All other fields are mandatory. (TODO)
+    - All other fields are mandatory.
   
 - Define a way to rank a list of user ids by the user's points:
     - A user gets points for each exercise he has started in the past 28 days.
